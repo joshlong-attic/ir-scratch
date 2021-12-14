@@ -30,9 +30,3 @@ public class IrApplication {
 }
 
 
-@Client
-interface SimpleClient {
-
-	@Activator
-	void activate();
-}

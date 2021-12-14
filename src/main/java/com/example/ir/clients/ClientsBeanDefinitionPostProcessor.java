@@ -42,7 +42,7 @@ class ClientsBeanDefinitionPostProcessor implements BeanDefinitionPostProcessor,
 		var type = propertyValues.getPropertyValue("type");
 		var value = Objects.requireNonNull(type).getValue();
 		log.info("the bean class name is " + beanClassName + " and the resolved type is " + value);
-		// beanDefinition.setTargetType(ResolvableType.forClass(Class.forName((String)value)));
+ 	beanDefinition.setTargetType(ResolvableType.forClass(Class.forName((String)value)));
 		beanDefinition.setAttribute(BeanRegistrationWriter.PRESERVE_TARGET_TYPE, true);
 		log.info ("finished") ;
 	}
