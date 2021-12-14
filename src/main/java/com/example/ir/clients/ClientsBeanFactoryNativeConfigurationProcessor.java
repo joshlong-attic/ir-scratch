@@ -1,6 +1,6 @@
 package com.example.ir.clients;
 
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.BeanFactoryNativeConfigurationProcessor;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeConfigurationRegistry;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeProxyEntry;
@@ -8,7 +8,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import java.util.Map;
 
-@Log4j2
+@Slf4j
 public class ClientsBeanFactoryNativeConfigurationProcessor
         implements BeanFactoryNativeConfigurationProcessor {
 

@@ -1,2 +1,4 @@
+org.springframework.context.annotation.BeanDefinitionPostProcessor=com.example.ir.clients.ClientsBeanDefinitionPostProcessor
+
 org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.BeanFactoryNativeConfigurationProcessor=\
     com.example.ir.clients.ClientsBeanFactoryNativeConfigurationProcessor

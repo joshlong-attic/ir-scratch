@@ -2,6 +2,7 @@ package com.example.ir.clients;
 
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
@@ -27,126 +28,127 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Log4j2
+@Slf4j
 public class ClientsRegistrar implements ImportBeanDefinitionRegistrar,
-        EnvironmentAware, ResourceLoaderAware {
+	EnvironmentAware, ResourceLoaderAware {
 
-    private Environment environment;
+	private Environment environment;
 
-    private ResourceLoader resourceLoader;
+	private ResourceLoader resourceLoader;
 
-    @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry, BeanNameGenerator importBeanNameGenerator) {
-        Collection<String> basePackages = this.getBasePackages(importingClassMetadata);
-        ClassPathScanningCandidateComponentProvider scanner = this.buildScanner();
-        basePackages.forEach(basePackage -> scanner.findCandidateComponents(basePackage)//
-                .stream()//
-                .filter(cc -> cc instanceof AnnotatedBeanDefinition)//
-                .map(abd -> (AnnotatedBeanDefinition) abd)//
-                .forEach(beanDefinition -> {
-                    log.info("found the bean definition: " + beanDefinition.getBeanClassName());
-                    var annotationMetadata = beanDefinition.getMetadata();
-                    this.registerClient(annotationMetadata, registry);
-                }));
-    }
+	@Override
+	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry, BeanNameGenerator importBeanNameGenerator) {
+		Collection<String> basePackages = this.getBasePackages(importingClassMetadata);
+		ClassPathScanningCandidateComponentProvider scanner = this.buildScanner();
+		basePackages.forEach(basePackage -> scanner.findCandidateComponents(basePackage)//
+			.stream()//
+			.filter(cc -> cc instanceof AnnotatedBeanDefinition)//
+			.map(abd -> (AnnotatedBeanDefinition) abd)//
+			.forEach(beanDefinition -> {
+				var annotationMetadata = beanDefinition.getMetadata();
+				var isClient = annotationMetadata.getAnnotationTypes().stream().anyMatch(s -> s.equals(Client.class.getName()));
+				if (!isClient) return;
+				this.registerClient(annotationMetadata, registry);
+			}));
+	}
 
-    private void registerClient(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry registry) {
-        String className = annotationMetadata.getClassName();
-        log.info ("going to build a cleint for " + className);
-        BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(ClientFactoryBean.class);
-        definition.addPropertyValue("type", className);
-        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+	private void registerClient(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry registry) {
+		String className = annotationMetadata.getClassName();
+		log.info("going to build a client for " + className);
+		BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(ClientFactoryBean.class);
+		definition.addPropertyValue("type", className);
+		definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
 
-        AbstractBeanDefinition beanDefinition = definition.getBeanDefinition();
-        beanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, className);
-        beanDefinition.setPrimary(true);
+		AbstractBeanDefinition beanDefinition = definition.getBeanDefinition();
+		beanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, className);
+		beanDefinition.setPrimary(true);
 
-        BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, new String[0]);
-        BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
-    }
+		BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, new String[0]);
+		BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
+	}
 
-    private Set<String> getBasePackages(AnnotationMetadata importingClassMetadata) {
-        Map<String, Object> attributes = importingClassMetadata.getAnnotationAttributes(EnableClients.class.getCanonicalName());
+	private Set<String> getBasePackages(AnnotationMetadata importingClassMetadata) {
+		Map<String, Object> attributes = importingClassMetadata.getAnnotationAttributes(EnableClients.class.getCanonicalName());
 
-        Set<String> basePackages = new HashSet<>();
-        for (String pkg : (String[]) attributes.get("value")) {
-            if (StringUtils.hasText(pkg)) {
-                basePackages.add(pkg);
-            }
-        }
-        for (String pkg : (String[]) attributes.get("basePackages")) {
-            if (StringUtils.hasText(pkg)) {
-                basePackages.add(pkg);
-            }
-        }
-        for (Class<?> clazz : (Class[]) attributes.get("basePackageClasses")) {
-            basePackages.add(ClassUtils.getPackageName(clazz));
-        }
-        if (basePackages.isEmpty()) {
-            basePackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
-        }
+		Set<String> basePackages = new HashSet<>();
+		for (String pkg : (String[]) attributes.get("value")) {
+			if (StringUtils.hasText(pkg)) {
+				basePackages.add(pkg);
+			}
+		}
+		for (String pkg : (String[]) attributes.get("basePackages")) {
+			if (StringUtils.hasText(pkg)) {
+				basePackages.add(pkg);
+			}
+		}
+		for (Class<?> clazz : (Class[]) attributes.get("basePackageClasses")) {
+			basePackages.add(ClassUtils.getPackageName(clazz));
+		}
+		if (basePackages.isEmpty()) {
+			basePackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
+		}
 
-        return basePackages;
-    }
+		return basePackages;
+	}
 
-    private ClassPathScanningCandidateComponentProvider buildScanner() {
-        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false, this.environment) {
+	private ClassPathScanningCandidateComponentProvider buildScanner() {
+		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false, this.environment) {
 
-            @Override
-            protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-                return beanDefinition.getMetadata().isIndependent();
-            }
+			@Override
+			protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+				return beanDefinition.getMetadata().isIndependent();
+			}
 
-            @Override
-            protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
-                return !metadataReader.getClassMetadata().isAnnotation();
-            }
-        };
-        scanner.addIncludeFilter(new AnnotationTypeFilter(Client.class));
-        scanner.setResourceLoader(this.resourceLoader);
-        return scanner;
-    }
+			@Override
+			protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
+				return !metadataReader.getClassMetadata().isAnnotation();
+			}
+		};
+		scanner.addIncludeFilter(new AnnotationTypeFilter(Client.class));
+		scanner.setResourceLoader(this.resourceLoader);
+		return scanner;
+	}
 
-    @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
-    }
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
+	@Override
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
 }
 
-@Log4j2
+@Slf4j
 class ClientFactoryBean<T> implements FactoryBean<T> {
 
-    private Class<?> type;
+	private Class<?> type;
 
-    @SneakyThrows
-    public void setType(String type) {
-        this.type = Class.forName(type);
-        log.info("the type is " + this.type.getCanonicalName());
-    }
+	@SneakyThrows
+	public void setType(String type) {
+		this.type = Class.forName(type);
+		log.info("the type is " + this.type.getCanonicalName());
+	}
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public T getObject() {
-        return (T) ProxyFactory.getProxy(this.type, (MethodInterceptor) invocation -> {
+	@Override
+	@SuppressWarnings("unchecked")
+	public T getObject() {
+		return (T) ProxyFactory.getProxy(this.type, (MethodInterceptor) invocation -> {
 
-            Method method = invocation.getMethod();
+			Method method = invocation.getMethod();
 
-            Activator annotation = method.getAnnotation(Activator.class);
-            if (null != annotation) {
-                System.out.println("you called " + method.getName());
-            }
+			Activator annotation = method.getAnnotation(Activator.class);
+			if (null != annotation) {
+				System.out.println("you called " + method.getName());
+			}
 
-            return null;
-        });
-    }
+			return null;
+		});
+	}
 
-    @Override
-    public Class<?> getObjectType() {
-        return this.type;
-    }
+	@Override
+	public Class<?> getObjectType() {
+		return this.type;
+	}
 }
