@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 import static java.lang.annotation.ElementType.TYPE;
 
-@Target({TYPE ,ElementType.METHOD})
+@Target({TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited

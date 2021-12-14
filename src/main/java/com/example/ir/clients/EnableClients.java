@@ -8,13 +8,13 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import( ClientsRegistrar.class)
+@Import(ClientsRegistrar.class)
 public @interface EnableClients {
 
-    String[] value() default {};
+	String[] value() default {};
 
-    String[] basePackages() default {};
+	String[] basePackages() default {};
 
-    Class<?>[] basePackageClasses() default {};
+	Class<?>[] basePackageClasses() default {};
 
 }

@@ -11,19 +11,19 @@ import java.util.Map;
 
 @Slf4j
 public class ClientsBeanFactoryNativeConfigurationProcessor
-        implements BeanFactoryNativeConfigurationProcessor {
+	implements BeanFactoryNativeConfigurationProcessor {
 
-    @Override
-    public void process(ConfigurableListableBeanFactory beanFactory, NativeConfigurationRegistry registry) {
-        Map<String, Object> beansWithAnnotation = beanFactory.getBeansWithAnnotation(Client.class);
-        if (log.isInfoEnabled()) {
-            log.info("there are " + beansWithAnnotation.size() + " beans with this annotation.");
-        }
+	@Override
+	public void process(ConfigurableListableBeanFactory beanFactory, NativeConfigurationRegistry registry) {
+		Map<String, Object> beansWithAnnotation = beanFactory.getBeansWithAnnotation(Client.class);
+		if (log.isInfoEnabled()) {
+			log.info("there are " + beansWithAnnotation.size() + " beans with this annotation.");
+		}
 
-        beansWithAnnotation.forEach((bn, e) -> {
-            log.info("found a bean of type " + e.getClass().getCanonicalName());
-            registry.reflection().forType(e.getClass()).withAccess(TypeAccess.values()).build();
-            registry.proxy().add(NativeProxyEntry.ofInterfaces(e.getClass().getInterfaces()));
-        });
-    }
+		beansWithAnnotation.forEach((bn, e) -> {
+			log.info("found a bean of type " + e.getClass().getCanonicalName());
+			registry.reflection().forType(e.getClass()).withAccess(TypeAccess.values()).build();
+			registry.proxy().add(NativeProxyEntry.ofInterfaces(e.getClass().getInterfaces()));
+		});
+	}
 }

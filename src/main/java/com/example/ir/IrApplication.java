@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.nativex.hint.TypeHint;
 
 @Slf4j
-@TypeHint(types =  {
-	ClientsRegistrar.class ,
-	SimpleClient.class ,
+@TypeHint(types = {
+	ClientsRegistrar.class,
+	SimpleClient.class,
 })
 @EnableClients
 @SpringBootApplication

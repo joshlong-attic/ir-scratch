@@ -7,5 +7,5 @@ import com.example.ir.clients.Client;
 public interface SimpleClient {
 
 	@Activator
-	void  activate();
+	void activate();
 }

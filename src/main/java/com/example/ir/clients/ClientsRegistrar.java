@@ -1,10 +1,6 @@
 package com.example.ir.clients;
 
-import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -22,7 +18,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
