@@ -9,15 +9,13 @@ import org.springframework.beans.factory.FactoryBean;
 import java.lang.reflect.Method;
 
 @Slf4j
-class ClientFactoryBean<T> implements FactoryBean<T> {
+class ClientsFactoryBean<T> implements FactoryBean<T> {
 
 	private Class<?> type;
 
 	@SneakyThrows
 	public void setType(String type) {
 		this.type = Class.forName(type);
-		log.info("the type is " + type);
-		log.info("the type object is " + this.type.getCanonicalName());
 	}
 
 	@Override
@@ -30,7 +28,7 @@ class ClientFactoryBean<T> implements FactoryBean<T> {
 
 			Activator annotation = method.getAnnotation(Activator.class);
 			if (null != annotation) {
-				System.out.println("you called " + method.getName());
+				System.out.println("you called " + method.getName() +"! enjoy your logs!");
 			}
 
 			return null;

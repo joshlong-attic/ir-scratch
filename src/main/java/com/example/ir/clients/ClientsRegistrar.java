@@ -1,5 +1,6 @@
 package com.example.ir.clients;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -47,17 +48,18 @@ public class ClientsRegistrar implements ImportBeanDefinitionRegistrar,
 			}));
 	}
 
+	@SneakyThrows
 	private void registerClient(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry registry) {
 		String className = annotationMetadata.getClassName();
 		log.info("going to build a client for " + className);
-		BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(ClientFactoryBean.class);
+		BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(ClientsFactoryBean.class);
 		definition.addPropertyValue("type", className);
 		definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
 
 		AbstractBeanDefinition beanDefinition = definition.getBeanDefinition();
 		beanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, className);
 		beanDefinition.setPrimary(true);
-
+		beanDefinition.setBeanClass(ClientsFactoryBean.class);
 		BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, new String[0]);
 		BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
 	}
