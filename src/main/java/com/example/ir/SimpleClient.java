@@ -4,8 +4,8 @@ import com.example.ir.clients.Activator;
 import com.example.ir.clients.Client;
 
 @Client
-interface SimpleClient {
+public interface SimpleClient {
 
 	@Activator
-	void activate();
+	void  activate();
 }

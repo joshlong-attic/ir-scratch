@@ -5,6 +5,7 @@ import org.springframework.aot.context.bootstrap.generator.infrastructure.native
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeConfigurationRegistry;
 import org.springframework.aot.context.bootstrap.generator.infrastructure.nativex.NativeProxyEntry;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.nativex.hint.TypeAccess;
 
 import java.util.Map;
 
@@ -21,10 +22,8 @@ public class ClientsBeanFactoryNativeConfigurationProcessor
 
         beansWithAnnotation.forEach((bn, e) -> {
             log.info("found a bean of type " + e.getClass().getCanonicalName());
-            Class<?>[] interfaces = e.getClass().getInterfaces();
-            for (var i : interfaces)
-                log.info("adding interface " + i.getName());
-            registry.proxy().add(NativeProxyEntry.ofInterfaces(interfaces));
+            registry.reflection().forType(e.getClass()).withAccess(TypeAccess.values()).build();
+            registry.proxy().add(NativeProxyEntry.ofInterfaces(e.getClass().getInterfaces()));
         });
     }
 }

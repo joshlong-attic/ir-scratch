@@ -21,11 +21,6 @@ class ClientsBeanDefinitionPostProcessor implements BeanDefinitionPostProcessor,
 	private ConfigurableBeanFactory beanFactory;
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
-	}
-
-	@Override
 	public void postProcessBeanDefinition(String beanName, RootBeanDefinition beanDefinition) {
 		if (ClassUtils.isPresent(this.enableClientsName, this.beanFactory.getBeanClassLoader()) &&
 			beanDefinition.hasBeanClass() &&
@@ -36,16 +31,23 @@ class ClientsBeanDefinitionPostProcessor implements BeanDefinitionPostProcessor,
 
 	@SneakyThrows
 	private void enrich(RootBeanDefinition beanDefinition) {
-
 		var beanClassName = beanDefinition.getBeanClassName();
 		var propertyValues = beanDefinition.getPropertyValues();
 		var type = propertyValues.getPropertyValue("type");
 		var value = Objects.requireNonNull(type).getValue();
 		log.info("the bean class name is " + beanClassName + " and the resolved type is " + value);
- 	beanDefinition.setTargetType(ResolvableType.forClass(Class.forName((String)value)));
+		var targetType = ResolvableType.forClassWithGenerics(
+		 beanDefinition .getBeanClass() ,
+			ClassUtils.forName((String) value, this.beanFactory.getBeanClassLoader())
+		);
+		log.info ("the target type is " + targetType.toString());
+		beanDefinition.setTargetType(targetType);
 		beanDefinition.setAttribute(BeanRegistrationWriter.PRESERVE_TARGET_TYPE, true);
 		log.info ("finished") ;
 	}
 
-
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+	}
 }

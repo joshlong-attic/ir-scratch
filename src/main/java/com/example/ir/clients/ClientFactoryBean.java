@@ -16,12 +16,14 @@ public class ClientFactoryBean<T> implements FactoryBean<T> {
 	@SneakyThrows
 	public void setType(String type) {
 		this.type = Class.forName(type);
-		log.info("the type is " + this.type.getCanonicalName());
+		log.info("the type is " +  type );
+		log.info("the type object is " + this.type.getCanonicalName());
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public T getObject() {
+		log.info ("trying to create an instance of "  + this.type );
 		return (T) ProxyFactory.getProxy(this.type, (MethodInterceptor) invocation -> {
 
 			Method method = invocation.getMethod();
